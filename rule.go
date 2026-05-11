@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/moby/buildkit/frontend/dockerfile/instructions"
@@ -52,9 +53,36 @@ var NoLatestTag = Rule{
 var NoUserDefined = Rule{
 	Description: "Checks that the user doesn't use the default user (root) in the image",
 	Severity: SeverityWarning,
-	//CheckUser: func(cmd *instructions.UserCommand)[]Issue{}
+	CheckStage: func(stage *instructions.Stage) []Issue {
+		root_flag := true
+		for _, cmd := range stage.Commands {
+			switch c := cmd.(type) {
+			case *instructions.UserCommand:
+				user := strings.ToLower(c.User)
+				if user == "root" {
+					root_flag = true
+				} else {
+					root_flag = false
+				}
+			}
+		}
+		if root_flag {
+			line := stageLine(stage)
+			return []Issue{
+				{
+					Severity: SeverityWarning,
+					Message: "Stage on line " + strconv.Itoa(line) + " ends with root user. Define a specific user for the stage.",
+				},
+			}
+		}
+		return nil
+	},
 }
 
+var Rules = []Rule{
+	NoLatestTag,
+	NoUserDefined,	
+} 
 
 
 // Helper functions

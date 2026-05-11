@@ -37,10 +37,10 @@ func main() {
 		debug(stages)
 	}
 
-	rules := []Rule{}
-	rules = append(rules, NoLatestTag)
+	//rules := []Rule{}
+	//rules = append(rules, NoLatestTag)
 
-	issues := Analyze(stages, rules)
+	issues := Analyze(stages, Rules)
 
 	for _, i := range issues {
 		fmt.Printf("L%d  %-7s  %s\n", i.Line, i.Severity, i.Message)
@@ -109,8 +109,8 @@ func debug(stages []instructions.Stage) {
 			}
 			fmt.Printf("   L%-3d %-7s %s\n", line, cmd.Name(), cmd)
 		}
-		fmt.Println()
-		print(ExportInfo())
+		fmt.Println("Docker Configuration:")
+		fmt.Println(ExportInfo())
 	}
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"strings"
@@ -37,7 +38,7 @@ func ExportInfo() Info {
 	// cngroups is recommended,
 	// userns_remap is recommended if rootless is off
 	output.rootless = strings.Contains(info, "rootless")
-	output.cgroupns = strings.Contains(info, "cngroups")
+	output.cgroupns = strings.Contains(info, "cgroupns")
 	output.userns_remap = strings.Contains(info, "userns")
 	output.docker_content_trust = getDockerContentTrust()
 	output.docker_socket = getSocketPath()
@@ -50,7 +51,11 @@ func getSocketPath() string {
 		panic(err)
 	}
 
-	cmd := exec.Command(path, "context show")
+	cmd := exec.Command(
+		path,
+		"context",
+		"show",
+	)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		panic(err)
@@ -58,8 +63,11 @@ func getSocketPath() string {
 
 	cmd = exec.Command(
 		path,
-		"context inspect "+string(output[:]),
-		" --format \"{{.Endpoints.}}\"",
+		"context",
+		"inspect",
+		string(bytes.TrimSpace(output[:])),
+		"--format",
+		`"{{.Endpoints.docker.Host}}"`,
 	)
 
 	output, err = cmd.CombinedOutput()
