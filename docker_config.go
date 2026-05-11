@@ -30,7 +30,44 @@ func getDockerInfo() string {
 	return string(output[:])
 }
 
-func ExportInfo() Info {
+func CheckConfig() []Issue {
+	config := exportInfo()
+	var output []Issue
+	if !config.rootless {
+		output = append(output, Issue{
+			Severity: SeverityWarning,
+			Message: "Docker daemon is not run in rootless mode",
+			Fix: "Install docker in rootless mode",
+		})
+		if !config.userns_remap {
+			output = append(output, Issue{
+				Severity: SeverityWarning,
+				Message: "Userns-remap (User namespace remap) is not enabled while docker is not run in rootless mode.",
+				Fix: "Enable userns-remap in your docker config.",
+			})
+		}
+	}
+	if !config.docker_content_trust {
+		output = append(output, Issue{
+			Severity: SeverityInfo,
+			Message: "The environment variable DOCKER_CONTENT_TRUST is not enabled, thus docker supports the usage of non-signed images.",
+			Fix: "Enable the environment variable DOCKER_CONTENT_TRUST and only use signed images.",
+		})
+	}
+	if !config.cgroupns {
+		output = append(output, Issue{
+			Severity: SeverityWarning,
+			Message: "cgroupns is not enabled in your config",
+			Fix: "Enable cgroupns",
+		})
+	}
+	if len(output) != 0 {
+		return output
+	}
+	return nil
+}
+
+func exportInfo() Info {
 	info := getDockerInfo()
 	output := Info{}
 

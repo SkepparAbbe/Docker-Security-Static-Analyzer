@@ -25,23 +25,21 @@ const (
 type Issue struct {
 	Severity Severity
 	Message  string
-	Line     int
+	Line     *int
 	Fix      string
 }
-
-// TODO
-// is found in stage
 
 var NoLatestTag = Rule{
 	Description: "Checks that the user doesn't use latest tag when using the FROM command on an image:tag",
 	Severity: SeverityWarning,
 	CheckStage: func(cmd *instructions.Stage) []Issue{
 		if strings.Contains(cmd.BaseName, ":latest") {
+			line := stageLine(cmd)
 			return []Issue{
 				{
 					Severity: SeverityWarning,
 					Message: "Using latest tag may introduce malicious dependencies if the targeted image is compromised.",
-					Line: stageLine(cmd),
+					Line: &line,
 					Fix: "Use versioned image.",
 				},
 			}
