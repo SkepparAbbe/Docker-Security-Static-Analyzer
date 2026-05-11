@@ -1,9 +1,5 @@
 # Example Dockerfile to test the parser
 
-FROM alpine
-
-
-
-yoo
+FROM alpine:latest
 RUN echo hello \
     && echo world

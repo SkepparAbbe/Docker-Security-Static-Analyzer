@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"flag"
 
 	"github.com/moby/buildkit/frontend/dockerfile/instructions"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
@@ -11,6 +12,9 @@ import (
 type Severity string
 
 func main() {
+	debugFlag := flag.Bool("debug" , false, "Enable debug mode");
+	flag.Parse()
+
 	f, err := os.Open("Dockerfile")
 	if err != nil {
 		panic(err)
@@ -29,7 +33,12 @@ func main() {
 		panic(err)
 	}
 
+	if *debugFlag {
+		debug(stages)
+	}
+
 	rules := []Rule{}
+
 	issues := Analyze(stages, rules)
 
 	for _, i := range issues {
@@ -37,9 +46,11 @@ func main() {
 	}
 }
 
+
 func Analyze(stages []instructions.Stage, rules []Rule) []Issue {
 	var out []Issue
-	for _, stage := range stages {
+	for i := range stages {
+		stage := &stages[i]
 
 		for _, rule := range rules {
 			if rule.CheckStage != nil {
@@ -67,4 +78,43 @@ func Analyze(stages []instructions.Stage, rules []Rule) []Issue {
 		}
 	}
 	return out
+}
+
+func debug(stages []instructions.Stage) {
+	fmt.Printf("Parsed %d stage(s)\n\n", len(stages))
+	for i, stage := range stages {
+		fmt.Printf("Stage %d\n", i)
+		fmt.Printf("├─ BaseName: %s\n", stage.BaseName)
+		fmt.Printf("├─ As:       %s\n", dash(stage.Name))
+		fmt.Printf("├─ Platform: %s\n", dash(stage.Platform))
+		fmt.Printf("└─ Instructions (%d):\n", len(stage.Commands)+1)
+
+		// FROM — synthesized from Stage fields, not from Commands
+		fromLine := 0
+		if len(stage.Location) > 0 {
+			fromLine = stage.Location[0].Start.Line
+		}
+		fmt.Printf("   L%-3d %-7s %s", fromLine, "FROM", stage.BaseName)
+		if stage.Name != "" {
+			fmt.Printf(" AS %s", stage.Name)
+		}
+		fmt.Println()
+
+		// Everything else
+		for _, cmd := range stage.Commands {
+			line := 0
+			if loc := cmd.Location(); len(loc) > 0 {
+				line = loc[0].Start.Line
+			}
+			fmt.Printf("   L%-3d %-7s %s\n", line, cmd.Name(), cmd)
+		}
+		fmt.Println()
+	}
+}
+
+func dash(s string) string {
+    if s == "" {
+        return "—"
+    }
+    return s
 }
