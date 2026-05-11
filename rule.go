@@ -9,10 +9,10 @@ import (
 type Rule struct {
 	Description string
 	Severity    Severity
+	CheckStage func(*instructions.Stage) []Issue
 	CheckRun   func(*instructions.RunCommand) []Issue
 	CheckCopy  func(*instructions.CopyCommand) []Issue
 	CheckUser  func(*instructions.UserCommand) []Issue
-	CheckStage func(*instructions.Stage) []Issue
 }
 
 const (
@@ -28,14 +28,10 @@ type Issue struct {
 	Fix      string
 }
 
-var CheckUser = Rule{
-	Description: "Checks that a user is set for the final stage",
-}
-
 // TODO
 // is found in stage
 
-var noLatestTag = Rule{
+var NoLatestTag = Rule{
 	Description: "Checks that the user doesn't use latest tag when using the FROM command on an image:tag",
 	Severity: SeverityWarning,
 	CheckStage: func(cmd *instructions.Stage) []Issue{
@@ -52,6 +48,14 @@ var noLatestTag = Rule{
 		return nil
 	},
 }
+
+var NoUserDefined = Rule{
+	Description: "Checks that the user doesn't use the default user (root) in the image",
+	Severity: SeverityWarning,
+	//CheckUser: func(cmd *instructions.UserCommand)[]Issue{}
+}
+
+
 
 // Helper functions
 func lineOf(cmd instructions.Command) int {

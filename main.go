@@ -38,6 +38,7 @@ func main() {
 	}
 
 	rules := []Rule{}
+	rules = append(rules, NoLatestTag)
 
 	issues := Analyze(stages, rules)
 
@@ -109,6 +110,7 @@ func debug(stages []instructions.Stage) {
 			fmt.Printf("   L%-3d %-7s %s\n", line, cmd.Name(), cmd)
 		}
 		fmt.Println()
+		print(ExportInfo())
 	}
 }
 

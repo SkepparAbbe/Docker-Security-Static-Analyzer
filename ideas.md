@@ -1,5 +1,7 @@
 ## Limitations
 * Ignore docker compose and swarm. Focus on dockerfiles and host docker configuration.
+* The docker socket mount happens when docker run is executed. A futher extension could be to look at command arguments to docker aswell.
+* Mount the host's root directory inside the container can only be done with the command line -v
 
 ## User not defined
 * (DockerFile) Check if USER is defined, if the deployment is run as root (if rootless mode isn't enabled)
@@ -10,8 +12,8 @@
 
 ## Check for volume exposure
 * (DockerFile) Are bound mounts resonable? 
-* (DockerFile) Is root on host bound to the container?
-* (DockerFile) Is the docker socket (/var/run/docker.sock) mounted to the container? Gives control over the daemon to the container. The current socket used can be found with: `docker context show` gives the name of the current configuration. `docker context inspect -name-` gives the configuration in json format. there the field Endpoints.docker.Host, it's called unix::*socket_name* 
+* ~~(DockerFile) Is root on host bound to the container?~~
+* ~~(DockerFile) Is the docker socket (/var/run/docker.sock) mounted to the container?~~ Gives control over the daemon to the container. The current socket used can be found with: `docker context show` gives the name of the current configuration. `docker context inspect -name-` gives the configuration in json format. there the field Endpoints.docker.Host, it's called unix::*socket_name* 
 
 ## DCT - image signatures
 * (DockerFile) Check if used images are signed.
