@@ -30,6 +30,8 @@ func getDockerInfo() string {
 	return string(output[:])
 }
 
+// Finds and checks the user's docker config. Searches for keywwords and reports
+// issues for individual or combinations of unsafe configurations. 
 func CheckConfig() []Issue {
 	config := exportInfo()
 	var output []Issue

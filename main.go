@@ -38,9 +38,6 @@ func main() {
 		debug(stages)
 	}
 
-	//rules := []Rule{}
-	//rules = append(rules, NoLatestTag)
-
 	issues := CheckConfig()
 	issues = append(issues, Analyze(stages, Rules)...)
 
@@ -57,7 +54,8 @@ func main() {
 	}
 }
 
-
+// Iterates over each stage and each instruction (command) in said stage.
+// Calls rule.go/Check...() for each stage instruction. 
 func Analyze(stages []instructions.Stage, rules []Rule) []Issue {
 	var out []Issue
 	for i := range stages {
