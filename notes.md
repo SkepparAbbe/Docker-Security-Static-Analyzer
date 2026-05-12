@@ -10,7 +10,7 @@ Containers are isolated environments for code to run. Containers are a more ligh
 
 The main mechanism for isolation are the unix concepts of cgroups and namespaces. Cgroups specifies the resource allocation to a container (CPU, memory, network bandwidth etc...) And namespaces isolates the container from processes outside the namespace. They cannot see them nor affect them (both the host system and other containers.)
 
-Namespaces are an old feature of the kernel, introduced in 2008 and is considered safe since it has had a long time for verification and bug finding.
+Namespaces are an old feature of the kernel, introduced in 20022 and is considered safe since it has had a long time for verification and bug finding.
 
 ## Networking
 Each container gets their own network stack, meaning that they do not by default have priviledged access to other container's sockets. The host can setup and configure the traffic between containers aswell as external hosts. Docker comes pre configured with a network between all containers called the bridge, which is an abstraction that makes the interface between containers behave just as they were regular machines connected on an Ethernet switch.
