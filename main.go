@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
-	"flag"
 
 	"github.com/moby/buildkit/frontend/dockerfile/instructions"
 	"github.com/moby/buildkit/frontend/dockerfile/parser"
@@ -12,7 +12,7 @@ import (
 type Severity string
 
 func main() {
-	debugFlag := flag.Bool("debug" , false, "Enable debug mode");
+	debugFlag := flag.Bool("debug", false, "Enable debug mode")
 	fixFlag := flag.Bool("fix", false, "Show fixes of potential problems")
 	flag.Parse()
 
@@ -45,7 +45,7 @@ func main() {
 		if i.Line != nil {
 			fmt.Printf("L%d  %-7s  %s\n", *i.Line, i.Severity, i.Message)
 
-		}else {
+		} else {
 			fmt.Printf("config  %-7s  %s\n", i.Severity, i.Message)
 		}
 		if *fixFlag {
@@ -55,7 +55,7 @@ func main() {
 }
 
 // Iterates over each stage and each instruction (command) in said stage.
-// Calls rule.go/Check...() for each stage instruction. 
+// Calls rule.go/Check...() for each stage instruction.
 func Analyze(stages []instructions.Stage, rules []Rule) []Issue {
 	var out []Issue
 	for i := range stages {
@@ -117,14 +117,12 @@ func debug(stages []instructions.Stage) {
 			}
 			fmt.Printf("   L%-3d %-7s %s\n", line, cmd.Name(), cmd)
 		}
-		fmt.Println("Docker Configuration:")
-		fmt.Println(exportInfo())
 	}
 }
 
 func dash(s string) string {
-    if s == "" {
-        return "—"
-    }
-    return s
+	if s == "" {
+		return "—"
+	}
+	return s
 }
