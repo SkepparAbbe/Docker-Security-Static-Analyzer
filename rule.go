@@ -14,6 +14,7 @@ type Rule struct {
 	CheckRun    func(*instructions.RunCommand) []Issue
 	CheckCopy   func(*instructions.CopyCommand) []Issue
 	CheckUser   func(*instructions.UserCommand) []Issue
+	CheckHealthcheck func(*instructions.HealthCheckCommand) []Issue
 }
 
 const (
@@ -103,6 +104,8 @@ var NoHashTagImage = Rule{
 		}
 	},
 }
+
+
 
 var Rules = []Rule{
 	NoLatestTag,

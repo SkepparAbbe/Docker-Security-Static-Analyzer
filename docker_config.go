@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -15,56 +16,58 @@ type Info struct {
 	docker_socket        string
 }
 
-func getDockerInfo() string {
+func getDockerSecurityInfo() string {
 	path, err := exec.LookPath("docker")
 	if err != nil {
 		panic(err)
 	}
-	cmd := exec.Command(path, "info")
+	cmd := exec.Command(path, "info", "--format", "{{.SecurityOptions}}")
 
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println(string(output[:]))
 	return string(output[:])
 }
 
 // Finds and checks the user's docker config. Searches for keywwords and reports
-// issues for individual or combinations of unsafe configurations. 
+// issues for individual or combinations of unsafe configurations.
 func CheckConfig() []Issue {
 	config := exportInfo()
 	var output []Issue
 	if !config.rootless {
 		output = append(output, Issue{
-			Severity: SeverityWarning,
-			Problem: "Docker daemon is not run in rootless mode",
+			Severity:    SeverityWarning,
+			Problem:     "Docker daemon is not run in rootless mode",
 			Description: "The Daemon has complete root access and any adversary inside the container who gains access over it gains full control.",
-			Fix: "Install docker in rootless mode",
+			Fix:         "Install docker in rootless mode",
 		})
 		if !config.userns_remap {
 			output = append(output, Issue{
-				Severity: SeverityWarning,
-				Problem: "Userns-remap (User namespace remap) is not enabled while docker is not run in rootless mode.",
+				Severity:    SeverityWarning,
+				Problem:     "Userns-remap (User namespace remap) is not enabled while docker is not run in rootless mode.",
 				Description: "Userns-remap maps the root of the container to a regular user on the host, giving an adversary who gains root access in the container less privileges.",
-				Fix: "Enable userns-remap in your docker config.",
+				Fix:         "Enable userns-remap in your docker config.",
 			})
 		}
 	}
 	if !config.docker_content_trust {
 		output = append(output, Issue{
-			Severity: SeverityInfo,
-			Problem: "The environment variable DOCKER_CONTENT_TRUST is not enabled",
+			Severity:    SeverityInfo,
+			Problem:     "The environment variable DOCKER_CONTENT_TRUST is not enabled",
 			Description: "This means that you are not verifying the integrity and publisher of the images you pull. This can lead to supply chain attacks.",
-			Fix: "Enable the environment variable DOCKER_CONTENT_TRUST and only use signed images.",
+			Fix:         "Enable the environment variable DOCKER_CONTENT_TRUST and only use signed images.",
 		})
 	}
 	if !config.cgroupns {
 		output = append(output, Issue{
-			Severity: SeverityWarning,
-			Problem: "cgroupns is not enabled in your config",
+			Severity:    SeverityWarning,
+			Problem:     "cgroupns is not enabled in your config",
 			Description: "A user inside the container cannot see the host's global cgroup tree if cgroupns is enabled.",
-			Fix: "Enable cgroupns",
+			Fix:         "Enable cgroupns",
 		})
 	}
 	if len(output) != 0 {
@@ -74,15 +77,15 @@ func CheckConfig() []Issue {
 }
 
 func exportInfo() Info {
-	info := getDockerInfo()
+	securityInfo := getDockerSecurityInfo()
 	output := Info{}
 
 	// rootless is recommended
 	// cngroups is recommended,
 	// userns_remap is recommended if rootless is off
-	output.rootless = strings.Contains(info, "rootless")
-	output.cgroupns = strings.Contains(info, "cgroupns")
-	output.userns_remap = strings.Contains(info, "userns")
+	output.rootless = strings.Contains(securityInfo, "rootless")
+	output.cgroupns = strings.Contains(securityInfo, "cgroupns")
+	output.userns_remap = strings.Contains(securityInfo, "userns")
 	output.docker_content_trust = getDockerContentTrust()
 	output.docker_socket = getSocketPath()
 	return output
