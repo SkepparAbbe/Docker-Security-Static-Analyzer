@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -29,7 +28,6 @@ func getDockerSecurityInfo() string {
 		panic(err)
 	}
 
-	fmt.Println(string(output[:]))
 	return string(output[:])
 }
 

@@ -45,12 +45,9 @@ Commands that are effected by DCT are:
 
 # STEPS:
 ## Program:
- - Add rule for checking if an image is signed.
  - Lookup more rules, or lookup implementation of the more complex rules in ideas.md
- - Develop rule to provide educational information about why a rule exists.
 
  ## Report:
- - Add "reading the config" to Approach
  - Add a run-time diagram of the program.
  - Lookup what to do in evaluation, conclusion.
  - Add sources.

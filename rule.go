@@ -14,7 +14,7 @@ type Rule struct {
 	CheckRun    func(*instructions.RunCommand) []Issue
 	CheckCopy   func(*instructions.CopyCommand) []Issue
 	CheckUser   func(*instructions.UserCommand) []Issue
-	CheckHealthcheck func(*instructions.HealthCheckCommand) []Issue
+	CheckAdd    func(*instructions.AddCommand) []Issue
 }
 
 const (
@@ -71,10 +71,10 @@ var NoUserDefined = Rule{
 			line := stageLine(stage)
 			return []Issue{
 				{
-					Severity: SeverityWarning,
-					Problem:  "Stage on line " + strconv.Itoa(line) + " ends with root user.",
+					Severity:    SeverityWarning,
+					Problem:     "Stage on line " + strconv.Itoa(line) + " ends with root user.",
 					Description: "If this stage is the runtime of the container, the main process of the container may have unecessary privileges which violates principle of least privilege",
-					Fix: "Define a specific user for the stage.",
+					Fix:         "Define a specific user for the stage.",
 				},
 			}
 		}
@@ -87,7 +87,7 @@ var NoHashTagImage = Rule{
 	Severity:    SeverityInfo,
 	CheckStage: func(stage *instructions.Stage) []Issue {
 		from := strings.Split(stage.OrigCmd, ":")
-		if (len(from) == 3 && from[1] == "sha256") {
+		if len(from) == 3 && from[1] == "sha256" {
 			if len(from[2]) == 64 {
 				return nil
 			}
@@ -105,12 +105,28 @@ var NoHashTagImage = Rule{
 	},
 }
 
-
+var AddCommand = Rule{
+	Description: "Checks that the user doesn't use the ADD command",
+	Severity:    SeverityInfo,
+	CheckAdd: func(cmd *instructions.AddCommand) []Issue {
+		line := lineOf(cmd)
+		return []Issue{
+			{
+				Severity:    SeverityInfo,
+				Problem:     "Using ADD command.",
+				Description: "The ADD command has some features that can lead to unexpected behavior, such as automatically extracting tar files. Consider using COPY instead for better clarity and control.",
+				Line:        &line,
+				Fix:         "Use COPY command instead of ADD.",
+			},
+		}
+	},
+}
 
 var Rules = []Rule{
 	NoLatestTag,
 	NoUserDefined,
 	NoHashTagImage,
+	AddCommand,
 }
 
 // Helper functions
