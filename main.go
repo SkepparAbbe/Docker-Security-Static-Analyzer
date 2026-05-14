@@ -79,7 +79,7 @@ func Analyze(stages []instructions.Stage, rules []Rule) []Issue {
 						out = append(out, rule.CheckUser(c)...)
 					}
 				case *instructions.AddCommand:
-					if rule.CheckUser != nil {
+					if rule.CheckAdd != nil {
 						out = append(out, rule.CheckAdd(c)...)
 					}
 				}
