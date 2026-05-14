@@ -38,13 +38,15 @@ func CheckConfig() []Issue {
 	if !config.rootless {
 		output = append(output, Issue{
 			Severity: SeverityWarning,
-			Message: "Docker daemon is not run in rootless mode",
+			Problem: "Docker daemon is not run in rootless mode",
+			Description: "The Daemon has complete root access and any adversary inside the container who gains access over it gains full control.",
 			Fix: "Install docker in rootless mode",
 		})
 		if !config.userns_remap {
 			output = append(output, Issue{
 				Severity: SeverityWarning,
-				Message: "Userns-remap (User namespace remap) is not enabled while docker is not run in rootless mode.",
+				Problem: "Userns-remap (User namespace remap) is not enabled while docker is not run in rootless mode.",
+				Description: "Userns-remap maps the root of the container to a regular user on the host, giving an adversary who gains root access in the container less privileges.",
 				Fix: "Enable userns-remap in your docker config.",
 			})
 		}
@@ -52,14 +54,16 @@ func CheckConfig() []Issue {
 	if !config.docker_content_trust {
 		output = append(output, Issue{
 			Severity: SeverityInfo,
-			Message: "The environment variable DOCKER_CONTENT_TRUST is not enabled, thus docker supports the usage of non-signed images.",
+			Problem: "The environment variable DOCKER_CONTENT_TRUST is not enabled",
+			Description: "This means that you are not verifying the integrity and publisher of the images you pull. This can lead to supply chain attacks.",
 			Fix: "Enable the environment variable DOCKER_CONTENT_TRUST and only use signed images.",
 		})
 	}
 	if !config.cgroupns {
 		output = append(output, Issue{
 			Severity: SeverityWarning,
-			Message: "cgroupns is not enabled in your config",
+			Problem: "cgroupns is not enabled in your config",
+			Description: "A user inside the container cannot see the host's global cgroup tree if cgroupns is enabled.",
 			Fix: "Enable cgroupns",
 		})
 	}

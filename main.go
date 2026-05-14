@@ -13,7 +13,6 @@ type Severity string
 
 func main() {
 	debugFlag := flag.Bool("debug", false, "Enable debug mode")
-	fixFlag := flag.Bool("fix", false, "Show fixes of potential problems")
 	flag.Parse()
 
 	f, err := os.Open("Dockerfile")
@@ -43,13 +42,10 @@ func main() {
 
 	for _, i := range issues {
 		if i.Line != nil {
-			fmt.Printf("L%d  %-7s  %s\n", *i.Line, i.Severity, i.Message)
+			fmt.Printf("L%d  %-7s  %s\n%s\n%s\n\n", *i.Line, i.Severity, i.Problem, i.Description, i.Fix)
 
 		} else {
-			fmt.Printf("config  %-7s  %s\n", i.Severity, i.Message)
-		}
-		if *fixFlag {
-			fmt.Printf("Fix:  %s\n", i.Fix)
+			fmt.Printf("config  %-7s  %s\n%s\n%s\n\n", i.Severity, i.Problem, i.Description, i.Fix)
 		}
 	}
 }
