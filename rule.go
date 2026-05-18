@@ -11,8 +11,6 @@ type Rule struct {
 	Description string
 	Severity    Severity
 	CheckStage  func(*instructions.Stage) []Issue
-	CheckRun    func(*instructions.RunCommand) []Issue
-	CheckCopy   func(*instructions.CopyCommand) []Issue
 	CheckUser   func(*instructions.UserCommand) []Issue
 	CheckAdd    func(*instructions.AddCommand) []Issue
 }
@@ -20,7 +18,6 @@ type Rule struct {
 const (
 	SeverityInfo    Severity = "info"
 	SeverityWarning Severity = "warning"
-	SeverityError   Severity = "error"
 )
 
 type Issue struct {
@@ -86,12 +83,16 @@ var NoHashTagImage = Rule{
 	Description: "Checks that an image hash a tag of format \"sha256:(64 characters)\"",
 	Severity:    SeverityInfo,
 	CheckStage: func(stage *instructions.Stage) []Issue {
-		from := strings.Split(stage.OrigCmd, ":")
-		if len(from) == 3 && from[1] == "sha256" {
-			if len(from[2]) == 64 {
-				return nil
-			}
+		hash := strings.Split(stage.BaseName, "@")
+		var from[] string
+		if len(hash)== 2 {
+			from = strings.Split(hash[1], ":")
 		}
+			if len(from) == 2 && from[0] == "sha256" {
+				if len(from[1]) == 64 {
+					return nil
+				}
+			}
 		line := stageLine(stage)
 		return []Issue{
 			{

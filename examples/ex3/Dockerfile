@@ -1,0 +1,3 @@
+FROM ubuntu@sha256:6ce79cda4ec324c3bcdffb486d24ece95ad17634fec4279779a52d6e726e9cc9
+COPY ./app /app
+USER appuser
