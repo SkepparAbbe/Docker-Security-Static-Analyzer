@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,7 +11,6 @@ type Info struct {
 	cgroupns             bool
 	userns_remap         bool
 	docker_content_trust bool
-	docker_socket        string
 }
 
 func getDockerSecurityInfo() string {
@@ -31,7 +29,7 @@ func getDockerSecurityInfo() string {
 	return string(output[:])
 }
 
-// Finds and checks the user's docker config. Searches for keywwords and reports
+// Finds and checks the user's docker config. Searches for keywords and reports
 // issues for individual or combinations of unsafe configurations.
 func CheckConfig() []Issue {
 	config := exportInfo()
@@ -79,47 +77,13 @@ func exportInfo() Info {
 	output := Info{}
 
 	// rootless is recommended
-	// cngroups is recommended,
+	// cgroupns is recommended,
 	// userns_remap is recommended if rootless is off
 	output.rootless = strings.Contains(securityInfo, "rootless")
 	output.cgroupns = strings.Contains(securityInfo, "cgroupns")
 	output.userns_remap = strings.Contains(securityInfo, "userns")
 	output.docker_content_trust = getDockerContentTrust()
-	output.docker_socket = getSocketPath()
 	return output
-}
-
-func getSocketPath() string {
-	path, err := exec.LookPath("docker")
-	if err != nil {
-		panic(err)
-	}
-
-	cmd := exec.Command(
-		path,
-		"context",
-		"show",
-	)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		panic(err)
-	}
-
-	cmd = exec.Command(
-		path,
-		"context",
-		"inspect",
-		string(bytes.TrimSpace(output[:])),
-		"--format",
-		`"{{.Endpoints.docker.Host}}"`,
-	)
-
-	output, err = cmd.CombinedOutput()
-	if err != nil {
-		panic(err)
-	}
-
-	return string(output[:])
 }
 
 func getDockerContentTrust() bool {
